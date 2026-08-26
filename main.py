@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
 import pandas as pd
-from scipy.stats import norm
+
 
 # 1.0-Pulling option chain for a specific ticker
 
