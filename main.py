@@ -8,7 +8,7 @@ import pandas as pd
 # 1.0-Pulling option chain for a specific ticker
 
 # Setting the ticker & Initial inputs
-symbol = "MSFT"
+symbol = input('Enter a Yahoo finance ticker (ex: AAPL): ')
 min_iv = 0.0001 #  1bp
 min_volume = 0 
 # 0 Creating a date selector
