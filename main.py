@@ -7,11 +7,10 @@ import pandas as pd
 from scipy.stats import norm
 
 
-# 0-Pulling option chain for a specific ticker
+# 1.0-Pulling option chain for a specific ticker
 
-#Select ticker
-
-
+#Setting the ticker
+symbol = "MSFT"
 
 def select_exp(symbol):
     tk = yf.Ticker(symbol)
@@ -26,7 +25,7 @@ def select_exp(symbol):
     #min_iv = 0.01
     #min_volume = 0
 
-
+# 1.1-Defining the function that will fetch the option chain from yf
 def pull_option_chain(symbol,exp_index,min_iv, min_volume):
     tk = yf.Ticker(symbol)
     dates = tk.options
@@ -63,32 +62,46 @@ def pull_option_chain(symbol,exp_index,min_iv, min_volume):
 
     return calls, puts
 
+#1.2-Calling the function to plot IV skew
+calls, puts = pull_option_chain(symbol,7,0.0001,0)
 
-calls, puts = pull_option_chain("NVDA",7,0.0001,0)
 
-# (1) Montecarlo simulation
+# 2 ---- GBM Montecarlo engine to simulate N amount of stock path over T period  
+# 
+#                           (0) Manual inputs
+window = "1y"   #for vol calculation
+rf_ticker = "^IRX"    #risk_free rare used
+#                       GBM Montecarlo engine inputs 
+Nsim = 1000
+T = 1  # Maturity (year fraction)
+steps = 252*T
 
+# (2.0)-Fetching other model inputs
 S0 = calls['spot_price'].iloc[0]
+window = "1y"
 #Get historic vol:
-def pull_hist_vol(symbol):
+# 2.1 - Defining a function that will fetch the symbol's annual volatililty
+def pull_hist_vol(symbol,window):
     tk = yf.Ticker(symbol)
-    symbol = symbol
-    hist = tk.history(period="1y")
+    hist = tk.history(period=window)
     hist['log_returns'] = np.log(hist['Close'] / hist['Close'].shift(1))
     daily_volatility = hist['log_returns'].std()
     historical_volatility = daily_volatility * np.sqrt(252)
-    return daily_volatility, historical_volatility, symbol
+    return daily_volatility, historical_volatility
 
-daily_volatility, historical_volatility, symbol = pull_hist_vol("NVDA")
+daily_volatility, historical_volatility = pull_hist_vol(symbol,window)
 
 vol = historical_volatility
-# Risk free rate ? Use the 3month t-bill as proxy for the 1Y (To only use yahoo finance)
-irx = yf.Ticker("^IRX")
+# For the exercice of only fetching data from Yahoo Finance, for the risk free rate 
+# I Use the 3month t-bill as proxy for the 1Y. Over 1-y the error shouldn't be significant.
+# 2.2  -Fetching the data for the selected yf risk-free rate ticker
+irx = yf.Ticker(rf_ticker)
 current_yield = irx.fast_info['previousClose']
 risk_free_rate = current_yield / 100.0
 r = risk_free_rate
 
 
+# 2.3 - Defining the GBM Montecarlo engine for my selected ticker
 
 def simulate_paths(S0,Nsim,steps,r,vol,T):
     paths = np.zeros((Nsim, steps +1))
@@ -106,16 +119,11 @@ def simulate_paths(S0,Nsim,steps,r,vol,T):
 
     return paths
 
-
-# Runing
-Nsim = 1000
-T = 1
-steps = 252*T
-
+# 2.4 -  Calling the GBM MC engine function
 my_paths = simulate_paths(S0, Nsim, steps, 0.04, vol, T)
 
-# Plotting the paths
-plt.plot(my_paths.T) 
+# 3.5 Plotting the paths  
+plt.plot(my_paths.T)  # since matplotlib reads data vertically, column by column
 plt.title(f" {Nsim} simulations of {symbol} price evolution \n over the next {steps} days")
 plt.xlabel("Time Steps (Days)")
 plt.ylabel("Stock Price")
