@@ -14,20 +14,13 @@ min_volume = 0
 # 0 Creating a date selector
 tk = yf.Ticker(symbol)
 dates = tk.options
-print(dates)
-
-exp_dates = []
-for i in dates:
-    exp_dates.append(dates.index(i))
-    exp_dates.append(i)
+exp_dates = dict(enumerate(dates))
 print(f"List of expiry dates for {symbol} options")
 print(exp_dates)
-
-
-#//////////////////////Run separately \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+x = input('Enter the nbr: ')
 # Input for exp_index
+exp_index = int(x)
 
-exp_index = 7
 
 
 # 1.1-Defining the function that will fetch the option chain from yf
