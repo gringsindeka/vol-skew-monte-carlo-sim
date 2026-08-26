@@ -1,4 +1,3 @@
-
 from matplotlib import dates
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -6,24 +5,30 @@ import yfinance as yf
 import pandas as pd
 from scipy.stats import norm
 
-
 # 1.0-Pulling option chain for a specific ticker
 
-#Setting the ticker
+# Setting the ticker & Initial inputs
 symbol = "MSFT"
+min_iv = 0.0001 #  1bp
+min_volume = 0 
+# 0 Creating a date selector
+tk = yf.Ticker(symbol)
+dates = tk.options
+print(dates)
 
-def select_exp(symbol):
-    tk = yf.Ticker(symbol)
-    dates = tk.options
-    print(dates)
-    return dates
+exp_dates = []
+for i in dates:
+    exp_dates.append(dates.index(i))
+    exp_dates.append(i)
+print(f"List of expiry dates for {symbol} options")
+print(exp_dates)
 
 
-#Default
-    #Select expiration date
-    #exp_index= 7
-    #min_iv = 0.01
-    #min_volume = 0
+#//////////////////////Run separately \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# Input for exp_index
+
+exp_index = 7
+
 
 # 1.1-Defining the function that will fetch the option chain from yf
 def pull_option_chain(symbol,exp_index,min_iv, min_volume):
@@ -63,7 +68,7 @@ def pull_option_chain(symbol,exp_index,min_iv, min_volume):
     return calls, puts
 
 #1.2-Calling the function to plot IV skew
-calls, puts = pull_option_chain(symbol,7,0.0001,0)
+calls, puts = pull_option_chain(symbol,exp_index,0.0001,0)
 
 
 # 2 ---- GBM Montecarlo engine to simulate N amount of stock path over T period  
