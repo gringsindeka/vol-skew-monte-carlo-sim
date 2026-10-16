@@ -15,7 +15,7 @@ dates = tk.options
 print(f"List of expiry dates for {symbol} options")
 print(dict(enumerate(dates)))
 # Input for exp_index
-exp_index = int(input('Enter the nbr: '))
+exp_index = int(input('Enter the index: '))
 
 
 # 1.1-Defining the function that will fetch the option chain from yf
